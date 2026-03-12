@@ -5,28 +5,21 @@
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
-
     initWindow("Name", "name");
 
     connect(m_nextBtn, &QPushButton::clicked, this, &MainWindow::nextButton);
     connect(m_cancelBtn, &QPushButton::clicked, qApp, &QApplication::quit);
     connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::backButton);
-
-
 }
 
-MainWindow::~MainWindow()
-{
-
-}
+MainWindow::~MainWindow() {}
 
 void MainWindow::nextButton()
 {
     int index = m_pages->currentIndex();
     int count = m_pages->count() - 1;
 
-    if(index < count)
-    {
+    if (index < count) {
         m_pages->setCurrentIndex(++index);
         updateButtons();
     }
@@ -36,8 +29,7 @@ void MainWindow::backButton()
 {
     int index = m_pages->currentIndex();
 
-    if(index > 0)
-    {
+    if (index > 0) {
         m_pages->setCurrentIndex(--index);
         updateButtons();
     }
@@ -48,17 +40,15 @@ void MainWindow::updateButtons()
     int index = m_pages->currentIndex();
     int last = m_pages->count() - 1;
 
-    if(index == last)
+    if (index == last)
         m_nextBtn->setText("Установить");
-    else if(index == 0)
+    else if (index == 0)
         m_backBtn->setEnabled(false);
-    else
-    {
+    else {
         m_backBtn->setEnabled(true);
         m_nextBtn->setText("Далее");
     }
 }
-
 
 bool MainWindow::initWindow(const QString &windowName, const QString &myName)
 {
@@ -73,12 +63,12 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
     titlePageLayout->addStretch();
 
     QWidget *selectPage = new QWidget(this);
-    QVBoxLayout *selectPageLayout = new QVBoxLayout;
-    selectPageLayout->addWidget(new QLabel("Выберите пакеты для установки", selectPage));
-    selectPageLayout->addStretch();
+    m_selectPageLayout = new QVBoxLayout(selectPage);
+    m_selectPageLayout->addWidget(new QLabel("Выберите пакеты для установки", selectPage));
+    m_selectPageLayout->addStretch();
 
     QWidget *setupPage = new QWidget(this);
-    QVBoxLayout *setupPageLayout = new QVBoxLayout;
+    QVBoxLayout *setupPageLayout = new QVBoxLayout(setupPage);
     setupPageLayout->addWidget(new QLabel("Установить выбранные пакеты?", setupPage));
     setupPageLayout->addStretch();
 
@@ -109,4 +99,34 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
 void MainWindow::initCheckbox()
 {
     QStringList files = m_installer.loadPackages();
+
+    if(files.isEmpty())
+    {
+        m_selectPageLayout->addWidget(new QLabel("Пакеты не найдены, положите пакеты в /packages"));
+        m_selectPageLayout->addStretch();
+        return;
+    }
+
+    for(auto& file: files)
+    {
+        QCheckBox *checkbox = new QCheckBox(file, this);
+        checkbox->setChecked(true);
+        m_packageCheckboxes.append(checkbox);
+        m_selectPageLayout->addWidget(checkbox);
+    }
+
+    m_selectPageLayout->addStretch();
+}
+
+QStringList MainWindow::selectedPackages() const
+{
+    QStringList selected;
+
+    for (QCheckBox *checkBox : m_packageCheckboxes) {
+        if (checkBox && checkBox->isChecked()) {
+            selected << checkBox->text();
+        }
+    }
+
+    return selected;
 }

@@ -1,12 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QWidget>
-#include <QPushButton>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMainWindow>
-#include <QHBoxLayout>
+#include <QPushButton>
 #include <QStackedWidget>
+#include <QWidget>
 
 #include "packageinstaller.h"
 
@@ -29,12 +29,17 @@ private:
     QLabel m_text = QLabel("MyName");
     QStackedWidget *m_pages;
 
+    QVBoxLayout *m_selectPageLayout;
+    QList<QCheckBox*> m_packageCheckboxes;
+
+
     bool initWindow(const QString &windowName, const QString &myName);
     void nextButton();
     void cancelButton();
     void backButton();
     void updateButtons();
     void initCheckbox();
+    QStringList selectedPackages() const;
 signals:
 };
 
