@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QWidget>
+#include <qprogressbar.h>
+#include <QMessageBox>
 
 #include "packageinstaller.h"
 
@@ -26,6 +28,9 @@ private:
     QPushButton *m_cancelBtn;
 
     QWidget *m_mainWidget;
+    QWidget *m_installPage;
+    QProgressBar *m_progressBar;
+    QLabel *m_installStatusLabel;
     QLabel m_text = QLabel("MyName");
     QStackedWidget *m_pages;
 
@@ -40,6 +45,7 @@ private:
     void updateButtons();
     void initCheckbox();
     QStringList selectedPackages() const;
+    void startInstallation();
 signals:
 };
 

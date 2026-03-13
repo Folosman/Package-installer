@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QProgressBar>
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -40,10 +41,18 @@ void MainWindow::updateButtons()
     int index = m_pages->currentIndex();
     int last = m_pages->count() - 1;
 
-    if (index == last)
+    if (index == 2)
         m_nextBtn->setText("Установить");
     else if (index == 0)
         m_backBtn->setEnabled(false);
+    else if (index == 1)
+    {
+        initCheckbox();
+        m_backBtn->setEnabled(true);
+        m_nextBtn->setText("Далее");
+    }
+    else if (index == 3)
+        m_installer.installPackages(selectedPackages());
     else {
         m_backBtn->setEnabled(true);
         m_nextBtn->setText("Далее");
@@ -72,9 +81,21 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
     setupPageLayout->addWidget(new QLabel("Установить выбранные пакеты?", setupPage));
     setupPageLayout->addStretch();
 
+    m_installPage = new QWidget(this);
+    QVBoxLayout *installPageLayout = new QVBoxLayout(m_installPage);
+    m_installStatusLabel = new QLabel("Подготовка к установке...", m_installPage);
+    m_progressBar = new QProgressBar(m_installPage);
+    m_progressBar->setRange(0, 0);
+
+    installPageLayout->addWidget(new QLabel("Установка пакетов", m_installPage));
+    installPageLayout->addWidget(m_installStatusLabel);
+    installPageLayout->addWidget(m_progressBar);
+    installPageLayout->addStretch();
+
     m_pages->addWidget(titlePage);
     m_pages->addWidget(selectPage);
     m_pages->addWidget(setupPage);
+    m_pages->addWidget(m_installPage);
 
     m_nextBtn = new QPushButton("Далее");
     m_backBtn = new QPushButton("Назад");
@@ -98,7 +119,27 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
 
 void MainWindow::initCheckbox()
 {
+
+    m_packageCheckboxes.clear();
+
     QStringList files = m_installer.loadPackages();
+
+    auto sizeLayout = m_selectPageLayout->count() - 1;
+
+
+
+    for(int i = sizeLayout; i >=0; --i)
+    {
+        QLayoutItem *item = m_selectPageLayout->itemAt(i);
+        QWidget *widget = item->widget();
+
+        if(qobject_cast<QCheckBox*>(widget))
+        {
+            m_selectPageLayout->takeAt(i);
+            delete widget;
+            delete item;
+        }
+    }
 
     if(files.isEmpty())
     {
@@ -114,8 +155,8 @@ void MainWindow::initCheckbox()
         m_packageCheckboxes.append(checkbox);
         m_selectPageLayout->addWidget(checkbox);
     }
-
     m_selectPageLayout->addStretch();
+
 }
 
 QStringList MainWindow::selectedPackages() const
@@ -129,4 +170,20 @@ QStringList MainWindow::selectedPackages() const
     }
 
     return selected;
+}
+
+void MainWindow::startInstallation()
+{
+    QStringList packages = selectedPackages();
+
+    if(packages.isEmpty())
+    {
+        QMessageBox::warning(this, "Установка", "Не выбраны пакеты для установки!");
+        m_pages->setCurrentIndex(1);
+        updateButtons();
+        return;
+    }
+
+    m_installStatusLabel->setText("Запуск установки...");
+    m_progressBar->setRange(0, 0);
 }

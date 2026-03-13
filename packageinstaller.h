@@ -3,6 +3,7 @@
 
 #include <QCheckBox>
 #include <QObject>
+#include <qprocess.h>
 
 class PackageInstaller : public QObject
 {
@@ -11,13 +12,17 @@ public:
     explicit PackageInstaller(QObject *parent = nullptr);
     ~PackageInstaller();
     QStringList loadPackages();
+    bool installPackages(const QStringList &path);
 
 signals:
+    void startInstallSignal();
 private:
-    bool installPackages(const QStringList &path);
     QString packagesDirPath();
 
-    QCheckBox *packageBox;
+
+    QProcess *m_installProcess;
+    void startInstall();
+    void errorOccured(QProcess::ProcessError error);
 };
 
 #endif // PACKAGEINSTALLER_H

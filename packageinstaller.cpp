@@ -29,25 +29,31 @@ bool PackageInstaller::installPackages(const QStringList &paths)
     if (paths.isEmpty())
         return false;
 
-    QProcess process;
+    m_installProcess = new QProcess(this);
+
+    connect(m_installProcess, &QProcess::started, this, &PackageInstaller::startInstall);
+    connect(m_installProcess, &QProcess::errorOccurred, this, &PackageInstaller::errorOccured);
 
     QStringList args;
     args << "pacman" << "-U" << "--noconfirm";
     args << paths;
 
-    process.start("pkexec", args);
+    m_installProcess->start("pkexec", args);
 
-    if (!process.waitForStarted())
-        return false;
-
-    if (!process.waitForFinished(-1))
-        return false;
-
-    if (process.exitStatus() != QProcess::NormalExit)
-        return false;
-
-    if (process.exitCode() != 0)
-        return false;
 
     return true;
 }
+
+void PackageInstaller::errorOccured(QProcess::ProcessError error)
+{
+    Q_UNUSED(error);
+
+
+}
+
+void PackageInstaller::startInstall()
+{
+    emit startInstallSignal();
+}
+
+
