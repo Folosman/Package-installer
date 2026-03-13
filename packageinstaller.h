@@ -16,6 +16,8 @@ public:
 
 signals:
     void startInstallSignal();
+    void errorOccuredSignal(QString error);
+    void finishedInstallSignal();
 private:
     QString packagesDirPath();
 
@@ -23,6 +25,7 @@ private:
     QProcess *m_installProcess;
     void startInstall();
     void errorOccured(QProcess::ProcessError error);
+    void finishedInstall(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // PACKAGEINSTALLER_H

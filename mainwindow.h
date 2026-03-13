@@ -47,6 +47,10 @@ private:
     QStringList selectedPackages() const;
     void startInstallation();
 signals:
+private slots:
+    void startInstallSlot();
+    void installErrorSlot(QString error);
+    void finishedInstallSlot();
 };
 
 #endif // MAINWINDOW_H

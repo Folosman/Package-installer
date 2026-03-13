@@ -8,12 +8,40 @@ MainWindow::MainWindow(QWidget *parent)
 {
     initWindow("Name", "name");
 
-    connect(m_nextBtn, &QPushButton::clicked, this, &MainWindow::nextButton);
-    connect(m_cancelBtn, &QPushButton::clicked, qApp, &QApplication::quit);
-    connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::backButton);
+    connect(m_nextBtn,      &QPushButton::clicked, this, &MainWindow::nextButton);
+    connect(m_cancelBtn,    &QPushButton::clicked, qApp, &QApplication::quit);
+    connect(m_backBtn,      &QPushButton::clicked, this, &MainWindow::backButton);
+
+    QObject::connect(&m_installer, &PackageInstaller::errorOccuredSignal,   this, &MainWindow::installErrorSlot);
+    QObject::connect(&m_installer, &PackageInstaller::startInstallSignal,   this, &MainWindow::startInstallSlot);
+    QObject::connect(&m_installer, &PackageInstaller::finishedInstallSignal, this, &MainWindow::finishedInstallSlot);
 }
 
 MainWindow::~MainWindow() {}
+
+void MainWindow::startInstallSlot()
+{
+    m_installStatusLabel->setText("Установка пакетов...");
+}
+
+void MainWindow::installErrorSlot(QString error)
+{
+    m_installStatusLabel->setText("Ошибка установки.");
+    QMessageBox::critical(this, "Ошибка", error);
+
+    m_pages->setCurrentIndex(2);
+    updateButtons();
+}
+
+void MainWindow::finishedInstallSlot()
+{
+    m_progressBar->setRange(0, 1);
+    m_progressBar->setValue(1);
+
+    m_installStatusLabel->setText("Установка завершена успешно.");
+    QMessageBox::information(this, "Готово", "Пакеты успешно установлены");
+    close();
+}
 
 void MainWindow::nextButton()
 {
@@ -52,7 +80,7 @@ void MainWindow::updateButtons()
         m_nextBtn->setText("Далее");
     }
     else if (index == 3)
-        m_installer.installPackages(selectedPackages());
+        startInstallation();
     else {
         m_backBtn->setEnabled(true);
         m_nextBtn->setText("Далее");

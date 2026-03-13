@@ -33,6 +33,7 @@ bool PackageInstaller::installPackages(const QStringList &paths)
 
     connect(m_installProcess, &QProcess::started, this, &PackageInstaller::startInstall);
     connect(m_installProcess, &QProcess::errorOccurred, this, &PackageInstaller::errorOccured);
+    connect(m_installProcess, &QProcess::finished, this, &PackageInstaller::finishedInstall);
 
     QStringList args;
     args << "pacman" << "-U" << "--noconfirm";
@@ -44,10 +45,31 @@ bool PackageInstaller::installPackages(const QStringList &paths)
     return true;
 }
 
+void PackageInstaller::finishedInstall(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+        emit finishedInstallSignal();
+        return;
+    }
+
+    QString err;
+    if (m_installProcess) {
+        err = QString::fromLocal8Bit(m_installProcess->readAllStandardError());
+    }
+
+    if (err.isEmpty()) {
+        err = "Не удалось установить пакеты.";
+    }
+
+    emit errorOccuredSignal(err);
+}
+
 void PackageInstaller::errorOccured(QProcess::ProcessError error)
 {
     Q_UNUSED(error);
 
+    if(m_installProcess)
+        emit errorOccuredSignal(m_installProcess->errorString());
 
 }
 
