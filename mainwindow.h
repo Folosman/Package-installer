@@ -26,6 +26,7 @@ private:
     QPushButton *m_nextBtn;
     QPushButton *m_backBtn;
     QPushButton *m_cancelBtn;
+    QPushButton *m_refreshBtn;
 
     QWidget *m_mainWidget;
     QWidget *m_installPage;
@@ -46,6 +47,8 @@ private:
     void initCheckbox();
     QStringList selectedPackages() const;
     void startInstallation();
+    void refreshButton();
+    void clearPackageCheckboxes();
 signals:
 private slots:
     void startInstallSlot();

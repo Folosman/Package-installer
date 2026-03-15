@@ -7,10 +7,12 @@ MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
     initWindow("Name", "name");
+    initCheckbox();
 
     connect(m_nextBtn,      &QPushButton::clicked, this, &MainWindow::nextButton);
     connect(m_cancelBtn,    &QPushButton::clicked, qApp, &QApplication::quit);
     connect(m_backBtn,      &QPushButton::clicked, this, &MainWindow::backButton);
+    connect(m_refreshBtn,   &QPushButton::clicked, this, &MainWindow::refreshButton);
 
     QObject::connect(&m_installer, &PackageInstaller::errorOccuredSignal,   this, &MainWindow::installErrorSlot);
     QObject::connect(&m_installer, &PackageInstaller::startInstallSignal,   this, &MainWindow::startInstallSlot);
@@ -41,6 +43,12 @@ void MainWindow::finishedInstallSlot()
     m_installStatusLabel->setText("Установка завершена успешно.");
     QMessageBox::information(this, "Готово", "Пакеты успешно установлены");
     close();
+}
+
+void MainWindow::refreshButton()
+{
+    clearPackageCheckboxes();
+    initCheckbox();
 }
 
 void MainWindow::nextButton()
@@ -75,7 +83,7 @@ void MainWindow::updateButtons()
         m_backBtn->setEnabled(false);
     else if (index == 1)
     {
-        initCheckbox();
+        // initCheckbox();
         m_backBtn->setEnabled(true);
         m_nextBtn->setText("Далее");
     }
@@ -85,6 +93,28 @@ void MainWindow::updateButtons()
         m_backBtn->setEnabled(true);
         m_nextBtn->setText("Далее");
     }
+}
+
+void MainWindow::clearPackageCheckboxes()
+{
+    while (m_selectPageLayout->count() > 1) {
+        QLayoutItem *item = m_selectPageLayout->takeAt(1);
+
+        if (!item)
+            continue;
+
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+
+        if (item->layout()) {
+            delete item->layout();
+        }
+
+        delete item;
+    }
+
+    m_packageCheckboxes.clear();
 }
 
 bool MainWindow::initWindow(const QString &windowName, const QString &myName)
@@ -101,8 +131,12 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
 
     QWidget *selectPage = new QWidget(this);
     m_selectPageLayout = new QVBoxLayout(selectPage);
-    m_selectPageLayout->addWidget(new QLabel("Выберите пакеты для установки", selectPage));
-    m_selectPageLayout->addStretch();
+    QHBoxLayout *selectTopLayout = new QHBoxLayout;
+    selectTopLayout->addWidget(new QLabel("Выберите пакеты для установки", selectPage));
+    selectTopLayout->addStretch();
+    m_refreshBtn = new QPushButton("Обновить", selectPage);
+    selectTopLayout->addWidget(m_refreshBtn);
+    m_selectPageLayout->addLayout(selectTopLayout);
 
     QWidget *setupPage = new QWidget(this);
     QVBoxLayout *setupPageLayout = new QVBoxLayout(setupPage);

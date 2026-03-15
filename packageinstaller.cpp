@@ -35,12 +35,17 @@ bool PackageInstaller::installPackages(const QStringList &paths)
     connect(m_installProcess, &QProcess::errorOccurred, this, &PackageInstaller::errorOccured);
     connect(m_installProcess, &QProcess::finished, this, &PackageInstaller::finishedInstall);
 
+    QStringList fullPaths;
+
+    for (const QString &p : paths) {
+        fullPaths << QDir("package").absoluteFilePath(p);
+    }
+
     QStringList args;
     args << "pacman" << "-U" << "--noconfirm";
-    args << paths;
+    args << fullPaths;
 
     m_installProcess->start("pkexec", args);
-
 
     return true;
 }
