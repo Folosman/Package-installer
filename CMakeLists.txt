@@ -13,6 +13,9 @@ add_executable(PackageInstaller main.cpp
     mainwindow.h mainwindow.cpp
     packageinstaller.h packageinstaller.cpp)
 
+qt_add_resources(APP_RESOURCES installer.qrc)
+target_sources(PackageInstaller PRIVATE ${APP_RESOURCES})
+
 target_link_libraries(PackageInstaller PRIVATE Qt6::Widgets)
 target_link_libraries(PackageInstaller PRIVATE Qt6::Core)
 

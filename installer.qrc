@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/packages">
+        <file>packages/cowsay.pkg.tar.zst</file>
+        <file>packages/sl.pkg.tar.zst</file>
+    </qresource>
+</RCC>

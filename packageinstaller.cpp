@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QProcess>
+#include <QTemporaryDir>
 
 PackageInstaller::PackageInstaller(QObject *parent)
     : QObject{parent}
@@ -15,9 +16,45 @@ QString PackageInstaller::packagesDirPath()
     return QCoreApplication::applicationDirPath() + "/packages";
 }
 
+QStringList PackageInstaller::extractPackages(const QStringList &packageNames)
+{
+    if(m_tempDir)
+        delete m_tempDir;
+
+    m_tempDir = new QTemporaryDir();
+
+    QStringList extractedPath;
+
+    for(const QString &packageName : packageNames)
+    {
+        const QString resourcePath = ":/packages/packages/" + packageName;
+        const QString outputPath = m_tempDir->path() + "/" + packageName;
+
+        QFile inFile(resourcePath);
+        if(!inFile.open(QIODevice::ReadOnly))
+            return{};
+
+
+        QFile outFile(outputPath);
+        if(!outFile.open(QIODevice::WriteOnly))
+            return{};
+
+        // qDebug() << outputPath;
+        outFile.write(inFile.readAll());
+        outFile.close();
+        inFile.close();
+
+        extractedPath << outputPath;
+    }
+
+    return extractedPath;
+
+}
+
 QStringList PackageInstaller::loadPackages()
 {
-    QDir dir(packagesDirPath());
+    // QDir dir(packagesDirPath());
+    QDir dir(":/packages/packages");
 
     QStringList files = dir.entryList(QStringList() << "*.pkg.tar.zst", QDir::Files, QDir::Name);
 
@@ -26,6 +63,11 @@ QStringList PackageInstaller::loadPackages()
 
 bool PackageInstaller::installPackages(const QStringList &paths)
 {
+
+    QStringList extractedPaths = extractPackages(paths);
+
+    // qDebug() << extractedPaths;
+
     if (paths.isEmpty())
         return false;
 
@@ -38,12 +80,12 @@ bool PackageInstaller::installPackages(const QStringList &paths)
     QStringList fullPaths;
 
     for (const QString &p : paths) {
-        fullPaths << QDir("package").absoluteFilePath(p);
+        fullPaths << QDir("packages").absoluteFilePath(p);
     }
 
     QStringList args;
     args << "pacman" << "-U" << "--noconfirm";
-    args << fullPaths;
+    args << extractedPaths;
 
     m_installProcess->start("pkexec", args);
 

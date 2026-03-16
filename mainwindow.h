@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <qprogressbar.h>
 #include <QMessageBox>
+#include <QListWidget>
 
 #include "packageinstaller.h"
 
@@ -34,6 +35,7 @@ private:
     QLabel *m_installStatusLabel;
     QLabel m_text = QLabel("MyName");
     QStackedWidget *m_pages;
+    QListWidget *m_selectedPackagesList;
 
     QVBoxLayout *m_selectPageLayout;
     QList<QCheckBox*> m_packageCheckboxes;
@@ -49,6 +51,7 @@ private:
     void startInstallation();
     void refreshButton();
     void clearPackageCheckboxes();
+    void updateSelectedPackagesPage();
 signals:
 private slots:
     void startInstallSlot();

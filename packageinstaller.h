@@ -3,6 +3,7 @@
 
 #include <QCheckBox>
 #include <QObject>
+#include <QTemporaryDir>
 #include <qprocess.h>
 
 class PackageInstaller : public QObject
@@ -20,12 +21,13 @@ signals:
     void finishedInstallSignal();
 private:
     QString packagesDirPath();
-
+    QTemporaryDir *m_tempDir;
 
     QProcess *m_installProcess;
     void startInstall();
     void errorOccured(QProcess::ProcessError error);
     void finishedInstall(int exitCode, QProcess::ExitStatus exitStatus);
+    QStringList extractPackages(const QStringList &packageNames);
 };
 
 #endif // PACKAGEINSTALLER_H
