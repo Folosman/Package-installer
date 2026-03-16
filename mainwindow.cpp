@@ -6,7 +6,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
-    initWindow("Name", "name");
+    initWindow("Installer", "Немтинов");
     initCheckbox();
 
     connect(m_nextBtn,      &QPushButton::clicked, this, &MainWindow::nextButton);
@@ -149,7 +149,7 @@ bool MainWindow::initWindow(const QString &windowName, const QString &myName)
 
     QWidget *titlePage = new QWidget(this);
     QVBoxLayout *titlePageLayout = new QVBoxLayout(titlePage);
-    titlePageLayout->addWidget(new QLabel("Мастер установки\nMyName", titlePage));
+    titlePageLayout->addWidget(new QLabel(QString("Мастер установки\n%1").arg(myName), titlePage));
     titlePageLayout->addStretch();
 
     QWidget *selectPage = new QWidget(this);
